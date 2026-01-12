@@ -97,6 +97,7 @@ Se incluye una gráfica de barras desarrollada con **Chart.js**, que muestra:
 Los datos provienen de:
 - Datos de incendios: FIRMS NASA https://firms.modaps.eosdis.nasa.gov/
 - Datos de PEMEX: https://mapa-hidrocarburos.energia.gob.mx/
+- Nota: se descartaron los pozos con estado de actividad INACTIVO o CERRADO.
 
 
 
