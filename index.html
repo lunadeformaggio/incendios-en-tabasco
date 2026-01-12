@@ -1,0 +1,814 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Incendios en Tabasco</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.34/esri/themes/dark/main.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="https://js.arcgis.com/4.34/"></script>
+    
+    
+    <style>
+      html,
+      body{
+        background-color: #202020;
+        color: #ffffff;
+      }
+      #MiMapa{
+        padding: 0;
+         margin: 0;
+          height: 100%;
+          width: 100%;
+          overflow: hidden;
+      }
+
+     /*///////////////////////////////////////////*/
+     /*////////PERSONALIZACIÓN DE WIDGETS////////*/
+     /*//////////////////////////////////////////*/
+
+
+    /*----------Coordinate Conversion------------*/
+    .esri-coordinate-conversion {
+      transform: scale(0.85);   /*cambiar tamaño */
+      backdrop-filter: blur(4px);
+    }
+
+    /*----------Botón Home------------*/
+    .esri-ui-top-left .esri-home {
+      margin-top: 10px;  /* Ajusta este número para moverlo más arriba o abajo */
+    }
+
+    /*----------Basemap Gallery------------*/
+    .esri.-ui-top-left .esri-basemap-gallery {
+      margin-top: 60px;  /* Ajusta este número para moverlo más arriba o abajo */
+    }
+
+    </style>
+
+    <script>
+      require([
+      "esri/config",
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/GeoJSONLayer",
+      "esri/widgets/LayerList",
+      "esri/widgets/TimeSlider",
+      "esri/widgets/CoordinateConversion",
+      "esri/widgets/ScaleBar",
+      "esri/widgets/Home",
+      "esri/widgets/BasemapGallery",
+      "esri/widgets/Expand",
+      ], function(  //funciones en el mismo orden
+        esriConfig,
+        Map,
+        MapView,
+        GeoJSONLayer,
+        LayerList,
+        TimeSlider,
+        CoordinateConversion,
+        ScaleBar,
+        Home,
+        BasemapGallery,
+        Expand
+        ) {
+    /*----------API Key------------*/
+      var esriConfig = {
+        apiKey: "AAPTxy8BH1VEsoebNVZXo8HurBDOriv4mI9YGxT5IfEksbK95gl730cHPIkSo0fHkbtiLxNi9vPbFdo0NzbsKqrJCSBjSJx-l6fJD7QEFdWcxfwimxTdKJMmiipAN3PVSoaxA5DAYChZTGY0_iB8XtMGer3DdUSLQgWRaVWKCg4Q8VM4WN6womaxA-ckbljDYpgkNzK9GqTJfSEQ_A0iEigoM_AB2XfJ9E-Iyq_7RAeb8LM.AT1_srIXJxOu",
+      };
+
+     /*----------Mapa------------*/
+      const map = new Map({   //objeto mapa
+        basemap: "satellite"
+      });
+
+      const view = new MapView({   //objeto vista
+        container: "MiMapa", //ID del div
+        map: map,
+        center: [-92.31, 17.90], //longitud, latitud
+        zoom: 9
+      });
+
+      /*///////////////////////////////////////////*/
+      /*/////////////////CAPAS/////////////////////*/
+      /*//////////////////////////////////////////*/
+
+
+      /*----------Capa de límite de Tabasco------------*/
+
+      const limite = new GeoJSONLayer({  
+        url: "./data/Limite_Tabasco.geojson",
+        title: "División Política de Tabasco",
+        renderer: {
+          type: "simple",
+          symbol: {
+          type: "simple-fill",
+          color: [0,0,0,0],
+          outline: { color: "white", width: 1.5 }
+          }
+        },
+      });
+
+     /*----------Pozos PEMEX------------*/
+
+      const pozos = new GeoJSONLayer({  
+        url: "./data/Pozos_PEMEX.geojson",
+        title: "Pozos de PEMEX",
+        popupTemplate: {
+          title: "Pozos de PEMEX",
+          content: [
+          {
+            type: "fields",
+            fieldInfos: [
+              {
+                fieldName: "pozo",
+                label: "Pozo"
+              },
+              {
+                fieldName: "campo",
+                label: "Campo"
+              },
+              {
+                fieldName: "estado_act",
+                label: "Estado actual"
+              },
+              {
+                fieldName: "ubicacin",
+                label: "Ubicación"
+              },
+              {
+                fieldName: "clasificac",
+                label: "Clasificación"
+              },
+              {
+                fieldName: "tipo_de_hi",
+                label: "Tipo de hidrocarburo"
+              },
+              {
+                fieldName: "fecha_inic",
+                label: "Fecha de inicio"
+              },
+              {
+                fieldName: "fecha_fin_",
+                label: "Fecha de fin"
+              },
+              {
+                fieldName: "profundida",
+                label: "Profundidad (m)"
+              }
+            ],
+          }
+          ]
+        },
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "picture-marker",
+            url: "./img/pozo.svg",   
+            width: "20px",
+            height: "20px",
+            scaleX: 1,
+            scaleY: 1
+          }
+        }
+      });
+
+       /*----------Instalaciones PEMEX------------*/
+
+      const instalaciones = new GeoJSONLayer({  
+        url: "./data/Instalaciones_petroleras.geojson",
+        title: "Instalaciones petroleras",
+        popupTemplate: {
+          title: "Instalaciones petroleras",
+          content: [
+          {
+            type: "fields",
+            fieldInfos: [
+              {
+                fieldName: "nombre_de_",
+                label: "Nombre de la instalación"
+              },
+              {
+                fieldName: "fuente",
+                label: "Fuente"
+              },
+              {
+                fieldName: "tipo",
+                label: "Tipo de instalación"
+              },
+              {
+                fieldName: "estado_act",
+                label: "Estado actual"
+              }
+            ],
+          }
+          ]
+        },
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "simple-marker",
+            style: "square",
+            color: "black",
+            size: 8,
+            outline: {
+              color: "white",
+              width: 1
+            }
+        }
+        },
+      });
+
+      /*----------Incendios en fuentes fijas------------*/
+
+      const fuentes_fijas = new GeoJSONLayer({  
+        url: "./data/Fuentes_Fijas_SUOMI.geojson",
+        title: "Incendios de fuentes fijas",
+        timeInfo: {
+          startField: "DATE_MX_TX",   //campo de fecha para el time slider
+          interval: {
+            unit: "days",
+            value: 1
+            }
+        },
+        popupTemplate: {
+          title: "Incendios de fuentes fijas",
+          content: [
+          {
+            type: "fields",
+            fieldInfos: [
+              {
+                fieldName: "LATITUDE",
+                label: "Latitud"
+              },
+              {
+                fieldName: "LONGITUDE",
+                label: "Longitud"
+              },
+              {
+                fieldName: "BRIGHTNESS",
+                label: "Temperatura de brillo (K)"
+              },
+              {
+                fieldName: "BRIGHT_T31",
+                label: "Temperatura del canal térmico T31"
+              },
+              {
+                fieldName: "DATE_MX_TX",
+                label: "Fecha de detección (UTC-6)",
+                format: {                     //cambiar formato de fecha
+                  dateFormat: "short-date"
+                }
+              },
+              {
+                fieldName: "HORA_MX",
+                label: "Hora de adquisición (UTC-6)",
+                format: {                     //cambiar formato de hora
+                  timeFormat: "short-time"
+                }
+              },
+              {
+                fieldName: "SATELLITE",
+                label: "Satélite"
+              },
+              {
+                fieldName: "INSTRUMENT",
+                label: "Sensor"
+              },
+              {
+                fieldName: "FRP",
+                label: "Potencia radiante (MW)"
+              },
+              {
+                fieldName: "DAYNIGHT",
+                label: "Detección de día o noche"
+              },
+              {
+                fieldName: "SCAN",
+                label: "Tamaño del pixel en dirección de escaneo (m)"
+              },
+              {
+                fieldName: "TRACK",
+                label: "Tamaño del pixel en dirección de trayectoria (m)"
+              }
+            ],
+          }
+          ]
+        },
+        renderer: {
+          type: "simple",
+          symbol: {
+           type: "simple-marker",
+           style: "circle",
+            color: [255, 102, 0, 0.7],
+            size: 8,
+            outline: {
+              color: [255, 0, 0, 0.7],
+              width: 1  
+            }
+          }
+        },
+      });
+
+
+
+      /*----------Capa de incendios de día------------*/
+
+      const incendiosDia = new GeoJSONLayer({  
+        url: "./data/Incendios_Vegetacion_Dia.geojson",
+        title: "Incendios durante el día",
+        timeInfo: {
+          startField: "DATE_MX",   //campo de fecha para el time slider
+          interval: {
+            unit: "days",
+            value: 1
+            }
+        },
+        popupTemplate: {
+          title: "Incendios durante el día",
+          content: [
+            {
+              type: "fields",
+              fieldInfos: [
+                {
+                  fieldName: "LATITUDE",
+                  label: "Latitud"
+                },
+                {
+                  fieldName: "LONGITUDE",
+                  label: "Longitud"
+                },
+                {
+                  fieldName: "BRIGHTNESS",
+                  label: "Temperatura de brillo (K)"
+                },
+                {
+                  fieldName: "BRIGHT_T31",
+                  label: "Temperatura del canal térmico T31"
+                },
+                {
+                  fieldName: "DATE_MX",
+                  label: "Fecha de detección (UTC-6)",
+                  format: {                     //cambiar formato de fecha
+                      dateFormat: "short-date"
+                  }
+                },
+                {
+                  fieldName: "HORA_MX",
+                  label: "Hora de adquisición (UTC-6)",
+                  format: {                     //cambiar formato de hora
+                      timeFormat: "short-time"
+                  }
+                },
+                {
+                  fieldName: "SATELLITE",
+                  label: "Satélite"
+                },
+                {
+                  fieldName: "INSTRUMENT",
+                  label: "Sensor"
+                },
+                {
+                  fieldName: "FRP",
+                  label: "Potencia radiante (MW)"
+                },
+                {
+                  fieldName: "DAYNIGHT",
+                  label: "Detección de día o noche"
+                },
+                {
+                  fieldName: "SCAN",
+                  label: "Tamaño del pixel en dirección de escaneo (m)"
+                },
+                {
+                  fieldName: "TRACK",
+                  label: "Tamaño del pixel en dirección de trayectoria (m)"
+                }
+                ],
+            }
+          ]
+        },
+        renderer: {
+          type: "simple",
+          symbol: {
+           type: "simple-marker",
+           style: "circle",
+           color: [255, 255, 153, 0.7],
+           size: 10,
+           outline: {
+             color: [251, 251, 21, 0.7],
+             width: 1  
+           }
+           
+          }
+        },
+        featureReduction: {   //Configuración de cluster
+          type: "cluster", 
+          clusterRadius: "50px",
+          clusterMinSize: "16px",
+          clusterMaxSize: "32px",
+          maxScale: 10000,
+          symbol: {
+            type: "simple-marker",
+            style: "circle",
+            color: [255, 255, 153, 0.7],
+            outline: {
+             color: [251, 251, 21, 0.7],
+             width: 1.5
+             }
+          },
+          labelingInfo: [{
+            deconflictionStrategy: "none",
+            labelExpressionInfo: {
+             expression: "Text($feature.cluster_count, '#,###')"
+            },
+            symbol: {
+              type: "text",
+              color: [80, 78, 2],
+              font: { 
+                size: 10, 
+                weight: "bold" }
+            },
+           labelPlacement: "center-center"
+          }]
+        }
+      });
+
+      /*----------Capa de incendios de noche------------*/
+
+      const incendiosNoche = new GeoJSONLayer({  
+        url: "./data/Incendios_Vegetacion_Noche.geojson",
+        title: "Incendios durante la noche",
+        timeInfo: {
+          startField: "DATE_MX",   //campo de fecha para el time slider
+          interval: {
+            unit: "days",
+            value: 1
+          }
+        },
+        popupTemplate: {
+          title: "Incendios durante la noche",
+          content: [
+          {
+            type: "fields",
+            fieldInfos: [
+              {
+                fieldName: "LATITUDE",
+                label: "Latitud"
+              },
+              {
+                fieldName: "LONGITUDE",
+                label: "Longitud"
+              },
+              {
+                fieldName: "BRIGHTNESS",
+                label: "Temperatura de brillo (K)"
+              },
+              {
+                fieldName: "BRIGHT_T31",
+                label: "Temperatura del canal térmico T31"
+              },
+              {
+                fieldName: "DATE_MX",
+                label: "Fecha de detección (UTC-6)",
+                format: {                     //cambiar formato de fecha
+                  dateFormat: "short-date"
+                }
+              },
+              {
+                fieldName: "HORA_MX",
+                label: "Hora de adquisición (UTC-6)",
+                format: {                     //cambiar formato de hora
+                  timeFormat: "short-time"
+                }
+              },
+              {
+                fieldName: "SATELLITE",
+                label: "Satélite"
+              },
+              {
+                fieldName: "INSTRUMENT",
+                label: "Sensor"
+              },
+              {
+                fieldName: "FRP",
+                label: "Potencia radiante (MW)"
+              },
+              {
+                fieldName: "DAYNIGHT",
+                label: "Detección de día o noche"
+              },
+              {
+                fieldName: "SCAN",
+                label: "Tamaño del pixel en dirección de escaneo (m)"
+              },
+              {
+                fieldName: "TRACK",
+                label: "Tamaño del pixel en dirección de trayectoria (m)"
+              }
+            ],
+          }
+          ]
+        },
+        renderer: {
+          type: "simple",
+          symbol: {
+           type: "simple-marker",
+           style: "circle",
+           color: [202, 238, 251, 0.7],
+           size: 10,
+           outline: {
+             color: [33, 95, 154, 0.7],
+             width: 1  
+           }
+           
+          }
+        },
+        featureReduction: {   //Configuración de cluster
+          type: "cluster", 
+          clusterRadius: "50px",
+          clusterMinSize: "16px",
+          clusterMaxSize: "32px",
+          maxScale: 10000,
+          symbol: {
+            type: "simple-marker",
+            style: "circle",
+            color: [202, 238, 251, 0.7],
+            outline: {
+             color: [33, 95, 154, 0.7],
+             width: 1.5
+             }
+          },
+          labelingInfo: [{
+            deconflictionStrategy: "none",
+            labelExpressionInfo: {
+             expression: "Text($feature.cluster_count, '#,###')"
+            },
+            symbol: {
+              type: "text",
+              color: [16, 72, 98],
+              font: { 
+                size: 10, 
+                weight: "bold" }
+            },
+           labelPlacement: "center-center"
+          }]
+        }
+      });
+
+
+   
+
+       //Agregar capas al mapa
+      map.add(limite);
+      map.add(instalaciones);
+      map.add(pozos);  
+      map.add(fuentes_fijas);
+      map.add(incendiosDia);
+      map.add(incendiosNoche); 
+
+
+
+      /*///////////////////////////////////////////*/
+      /*/////////////////WIDGETS//////////////////*/
+      /*//////////////////////////////////////////*/
+
+        //Agregar Layer List
+        const layerList = new LayerList({
+          view: view,
+          icon: "layers",
+            listItemCreatedFunction: (event) => {
+          const item = event.item;
+          // Mostrar la leyenda (simbología) para cada capa
+          item.panel = {
+            content: "legend",
+            open: false  // cerrado por defecto
+          };
+        }
+        });
+
+        //Agregar Scale Bar
+        const scaleBar = new ScaleBar({
+          view: view,
+          barStyle: "line",
+          unit: "metric",
+          width: 136
+        });
+
+        //Agregar Coordinate Conversion
+        const ccWidget = new CoordinateConversion({
+          view: view,
+          orientation: "auto"
+        });
+
+        //Agregar time slider
+        const timeSlider = new TimeSlider({
+          view: view,
+          container: "timeSliderDiv",  //Declarar en Div externo
+          mode: "time-window",
+          timevisible: true,
+          playRate: 100,
+          fullTimeExtent: {
+            start: new Date(2025, 0, 1),
+            end: new Date(2025, 7, 31)
+          },
+          stops: {
+            interval: {
+              value: 1,
+              unit: "days"
+            }
+          },
+        });
+
+        //Inicializar time extent al cargar la vista
+        timeSlider.timeExtent = {
+          start: new Date(2025, 0, 1),
+          end: new Date(2025, 0, 15)
+        };
+
+        timeSlider.play();
+
+        //Agregar Home Button
+         const homebutton = new Home({
+          view: view 
+        });
+
+        //Agregar Basemap Gallery
+        const basemapGallery = new BasemapGallery({
+          view: view,
+          container: document.createElement("div")  //Crear contenedor vacío
+        });
+
+        //Expand
+        const basemapExpand = new Expand({
+          view: view,
+          content: basemapGallery,
+          expandIconClass: "esri-icon-basemap", // icono de galería de mapas base
+          expanded: false
+        });
+         
+
+
+        
+
+
+        //Agregar widgets al view
+       
+        view.ui.add(layerList, {
+          position: "top-right"
+        });
+        view.ui.add(scaleBar, {
+          position: "bottom-left"
+        });
+        view.ui.add(ccWidget, {
+          position: "bottom-right"
+        });
+        view.ui.add(timeSlider, {
+          position: "bottom-center"
+        });
+        view.ui.add(homebutton, "top-left");
+        view.ui.add(basemapExpand, "top-left");
+        view.ui.add(document.getElementById("chartDiv"), "top-right");
+
+
+        // ============ GRÁFICA DE INCENDIOS ============
+        view.when(function() {
+          
+          let GraficaIncendios;
+
+          function crearGrafica() {
+            const ctx = document.getElementById('GraficaIncendios').getContext('2d');
+            GraficaIncendios = new Chart(ctx, {
+              type: 'bar',   //Grafica de barras
+              data: {
+                labels: [],  
+                datasets: [{
+                  label: 'Incendios detectados',
+                  backgroundColor: '#ff642e',
+                  borderColor: '#ff0000',
+                  borderWidth: 1,
+                  data: []
+                }]
+              },
+              options: {
+                responsive: true,   //ajustable al contenedor
+                legend: {
+                  display: true,
+                  labels: { fontColor: '#ffffff' }
+                },
+                scales: {
+                  yAxes: [{
+                    ticks: { 
+                      beginAtZero: true,
+                      fontColor: '#ffffff'
+                    },
+                    gridLines: { color: '#696969' }
+                  }],
+                  xAxes: [{
+                    ticks: { fontColor: '#ffffff' },
+                    gridLines: { color: '#696969' }
+                  }]
+                }
+              }
+            });
+          }
+
+          crearGrafica();
+
+          timeSlider.watch("timeExtent", function() {
+            actualizarGrafica();
+          });
+
+          async function actualizarGrafica() {
+            try {
+              const queryDia = {
+                where: "1=1",
+                timeExtent: timeSlider.timeExtent,
+                returnGeometry: false,
+                outFields: ["DATE_MX"]
+              };
+              
+              const resultsDia = await incendiosDia.queryFeatures(queryDia);
+              
+              const queryNoche = {
+                where: "1=1",
+                timeExtent: timeSlider.timeExtent,
+                returnGeometry: false,
+                outFields: ["DATE_MX"]
+              };
+              
+              const resultsNoche = await incendiosNoche.queryFeatures(queryNoche);
+              
+              const todosIncendios = [...resultsDia.features, ...resultsNoche.features];
+              
+              const conteosPorFecha = {};
+              todosIncendios.forEach(feature => {
+                const fecha = new Date(feature.attributes.DATE_MX);
+                const fechaStr = fecha.toLocaleDateString('es-MX');
+                
+                if (conteosPorFecha[fechaStr]) {
+                  conteosPorFecha[fechaStr]++;
+                } else {
+                  conteosPorFecha[fechaStr] = 1;
+                }
+              });
+              
+              const fechas = Object.keys(conteosPorFecha).sort();
+              const conteos = fechas.map(fecha => conteosPorFecha[fecha]);
+              
+              GraficaIncendios.data.labels = fechas;
+              GraficaIncendios.data.datasets[0].data = conteos;
+              GraficaIncendios.update();
+              
+            } catch (error) {
+              console.error("Error al actualizar gráfica:", error);
+            }
+          }
+
+          actualizarGrafica();
+
+        });
+        
+
+
+    });
+    </script>
+        
+
+  </head>
+
+
+
+   <body>
+
+     <div id="MiMapa"></div>
+
+     <div id="chartDiv"
+     class="esri-widget"
+     style="
+     padding: 15px; 
+     width: 400px; 
+     background-color: rgba(32, 32, 32, 0.9);">
+      <h4 style="
+      margin: 0 0 10px 0; 
+      color: #ffffff;">Incendios por día</h4>
+     <canvas 
+     id="GraficaIncendios" 
+     height="180" 
+     width="370">
+    </canvas>
+    </div>
+    
+    <div id="timeSliderDiv" 
+    style="
+      position: absolute; 
+      bottom: 20px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      width: 50%; 
+      z-index: 99;">
+    </div>
+
+
+  </body>  
+</html>
+
+  
