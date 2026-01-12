@@ -812,7 +812,11 @@
                 }
               });
               
-              const fechas = Object.keys(conteosPorFecha).sort();
+              const fechas = Object.keys(conteosPorFecha).sort((a, b) => {
+                const dateA = new Date(a.split('/').reverse().join('-'));
+                const dateB = new Date(b.split('/').reverse().join('-'));
+                return dateA - dateB;
+              });
               const conteos = fechas.map(fecha => conteosPorFecha[fecha]);
               
               GraficaIncendios.data.labels = fechas;
