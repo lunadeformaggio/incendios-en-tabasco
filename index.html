@@ -34,13 +34,69 @@
 
     /*----------Botón Home------------*/
     .esri-ui-top-left .esri-home {
-      margin-top: 10px;  /* Ajusta este número para moverlo más arriba o abajo */
+      margin-top: 10px;  /*más arriba o abajo */
     }
 
     /*----------Basemap Gallery------------*/
     .esri.-ui-top-left .esri-basemap-gallery {
-      margin-top: 60px;  /* Ajusta este número para moverlo más arriba o abajo */
+      margin-top: 60px;  /*más arriba o abajo */
     }
+
+    /*----------Leyenda personalizada------------*/
+
+      #customLegend {
+    position: absolute;
+    bottom: 80px;
+    left: 5px;
+    background: rgba(32, 32, 32, 0.9);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: white;
+    min-width: 180px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .legend-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  /* Simbología replicada */
+  .legend-icon.dia {
+    background: rgba(255, 255, 153, 0.7);
+    border: 1px solid rgba(251, 251, 21, 0.7);
+  }
+
+  .legend-icon.noche {
+    background: rgba(202, 238, 251, 0.7);
+    border: 1px solid rgba(33, 95, 154, 0.7);
+  }
+
+  .legend-icon.fuentes {
+    background: rgba(255, 102, 0, 0.7);
+    border: 1px solid rgba(255, 0, 0, 0.7);
+  }
+
+  .legend-svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+  }
+
+  .legend-icon.instalaciones {
+    background: black;
+     border-radius: 0;  /* cuadrado */
+    border: 1px solid white;
+  }
+
 
     </style>
 
@@ -667,9 +723,14 @@
         view.ui.add(homebutton, "top-left");
         view.ui.add(basemapExpand, "top-left");
         view.ui.add(document.getElementById("chartDiv"), "top-right");
+        view.ui.add(document.getElementById("customLegend"), {
+          position: "bottom-left"
+        });
 
 
-        // ============ GRÁFICA DE INCENDIOS ============
+      /*///////////////////////////////////////////*/
+      /*/////////////////GRÁFICA///////////////////*/
+      /*//////////////////////////////////////////*/
         view.when(function() {
           
           let GraficaIncendios;
@@ -805,6 +866,35 @@
       transform: translateX(-50%); 
       width: 50%; 
       z-index: 99;">
+    </div>
+
+    <div id="customLegend" class="esri-widget">
+      <div class="legend-item">
+        <span class="legend-icon dia"></span>
+        <span class="legend-label">Incendios día</span>
+      </div>
+
+      <div class="legend-item">
+        <span class="legend-icon noche"></span>
+        <span class="legend-label">Incendios noche</span>
+      </div>
+
+      <div class="legend-item">
+        <span class="legend-icon fuentes"></span>
+        <span class="legend-label">Fuentes de incendio fijas</span>
+      </div>
+
+      <div class="legend-item">
+        <img src="./img/pozo.svg" class="legend-svg">
+        <span class="legend-label">Pozos PEMEX</span>
+      </div>
+
+      <div class="legend-item">
+        <span class="legend-icon instalaciones"></span>
+        <span class="legend-label">Instalaciones petroleras</span>
+      </div>
+
+      
     </div>
 
 
