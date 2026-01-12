@@ -1,6 +1,6 @@
 🔥🔥🔥 Incendios 2025 en Tabasco – Visor Web GIS  🔥🔥🔥
 
-Se presenta un visor web interactivo desarrollado con **ArcGIS API for JavaScript (v4.34)** para la visualización, análisis temporal y exploración de incendios detectados por sensores satelitales en el periodo de enero a octubre de 2025 en el estado de **Tabasco, México**. 
+Se presenta un visor web interactivo desarrollado con **ArcGIS API for JavaScript (v4.34)** para la visualización, análisis temporal y exploración de incendios detectados por sensores satelitales en el periodo de enero a agosto de 2025 en el estado de **Tabasco, México**. 
 El proyecto integra datos geoespaciales, control temporal, clustering dinámico y visualización estadística para apoyar el análisis ambiental y territorial.
 La aplicación utiliza datos de sensores satelitales VIIRS y MODIS para proporcionar información detallada sobre eventos de fuego, incluyendo temperatura, potencia radiante y ubicación precisa. Al detectarse fuentes térmicas permanentes provenientes de pozos e instalaciones petroleras, se incluyó información relacionada a la ubicación de estos.
 
